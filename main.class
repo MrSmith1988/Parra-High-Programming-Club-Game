@@ -1,7 +1,204 @@
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferStrategy;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import javax.swing.JFrame;
 
-public class Main {
-
-	public static void main(String[] args){
-	   	System.out.println("Hello World");
+public class Game extends Canvas implements Runnable {
+	
+	private static final long serialVersionUID = 1L;
+	public static final int ScreenWidth = 800;
+	public static final int ScreenHeight = 640;
+	public final String TITLE = "Legend of Parra High";
+	
+	private boolean running = false;
+	public static boolean paused = false;
+	private Thread thread;
+	
+	private BufferedImage image = new BufferedImage(ScreenWidth, ScreenHeight, BufferedImage.TYPE_INT_RGB);
+	private static BufferedImage character = null;
+	
+	
+	//Flags
+	public static boolean up_key_press = false;
+	public static boolean down_key_press = false;
+	public static boolean left_key_press = false;
+	public static boolean right_key_press = false;
+	public static boolean space_key_press = false;
+	
+	public static enum STATE {
+		
+	};
+	
+	private void init() {
+		requestFocus();
+		BufferedImageLoader loader = new BufferedImageLoader();
+		/*try {
+			
+		} catch(IOException e) {
+			e.printStackTrace();
+		}*/
+		
+		this.addKeyListener(new KeyInput(this));
 	}
-}  
+	
+	private synchronized void start() { //START OF start METHOD
+		if(running) {
+			return;
+		}
+		running = true;
+		thread = new Thread(this);
+		thread.start();
+	} //END OF start METHOD
+	
+	private synchronized void stop() { //START OF stop METHOD
+		if(!running) {
+			return;
+		}
+		running = false;
+		try {
+			thread.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.exit(0);
+	} //END OF stop METHOD
+	
+	public void run() { //GameLoop Start
+		init();
+		long lastTime = System.nanoTime();
+		final double amountOfTicks = 60.0;
+		double ns = 1000000000 / amountOfTicks;
+		double delta = 0;
+		int updates = 0;
+		int frames = 0;
+		long timer = System.currentTimeMillis();
+		
+		while(running) {
+			long now = System.nanoTime();
+			delta += (now - lastTime) / ns;
+			lastTime = now;
+			if(delta >= 1) {
+				tick();
+				updates++;
+				delta--;
+			}
+			Render();
+			frames++;
+			
+			if(System.currentTimeMillis() - timer > 1000) {
+				timer += 1000;
+				System.out.println(updates + " Ticks, FPS " + frames/* + ", Rate " + rate*/);
+				updates = 0;
+				frames = 0;
+			}
+			
+		}
+		stop();
+		
+	} //END OF GameLoop
+	
+	private void tick() {
+		
+	}
+	
+	private void Render() { //START OF Render METHOD
+		BufferStrategy bs = this.getBufferStrategy();
+		
+		if(bs == null) {
+			createBufferStrategy(3); //Parameter is number of buffers.
+			return;
+		}
+		
+		Graphics g = bs.getDrawGraphics();
+		/////////////////////////////////
+		
+		g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+			
+		/////////////////////////////////
+		g.dispose();
+		bs.show();
+		
+	} //END OF Render METHOD
+	
+	public void keyPressed(KeyEvent e) {
+		int key = e.getKeyCode();
+		switch(key) {
+			case KeyEvent.VK_ESCAPE:
+				
+				break;
+			case KeyEvent.VK_UP:
+				
+				break;
+			case KeyEvent.VK_DOWN:
+				
+				break;
+			case KeyEvent.VK_LEFT:
+				
+				break;
+			case KeyEvent.VK_RIGHT:
+				
+				break;
+			case KeyEvent.VK_SPACE:
+				
+				break;
+			case KeyEvent.VK_R:
+				
+				break;
+			case KeyEvent.VK_H:
+				
+				break;
+		}
+	}
+	
+	public void keyReleased(KeyEvent e) {
+		int key = e.getKeyCode();
+		
+		switch(key) {
+			case KeyEvent.VK_UP:
+				
+				break;
+			case KeyEvent.VK_DOWN:
+				
+				break;
+			case KeyEvent.VK_LEFT:
+				
+				break;
+			case KeyEvent.VK_RIGHT:
+				
+				break;
+			case KeyEvent.VK_SPACE:
+				
+				break;
+			}
+	}
+	
+	public static void main(String[] args) {
+		
+		Game game = new Game();
+		
+		game.setPreferredSize(new Dimension(ScreenWidth, ScreenHeight));
+		game.setMaximumSize(new Dimension(ScreenWidth, ScreenHeight));
+		game.setMinimumSize(new Dimension(ScreenWidth, ScreenHeight));
+		
+		JFrame frame = new JFrame(game.TITLE);
+		frame.add(game);
+		frame.pack();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setResizable(false);
+		frame.setLocationRelativeTo(null);
+		frame.setVisible(true);
+		
+		game.start();
+		
+	} //END OF main
+	
+	public static BufferedImage getSpriteSheet() {
+		return character;
+	}
+
+
+} //END OF Game Class
